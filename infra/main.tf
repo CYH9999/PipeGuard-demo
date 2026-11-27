@@ -33,7 +33,8 @@ data "aws_iam_policy_document" "pipeguard_basrashop_deploy" {
       values   = ["repo:CYH9999/PipeGuard-demo:ref:refs/heads/main"]
     }
   }
-}  statement {
+
+  statement {
     sid     = "AllMyRepositories"
     effect  = "Allow"
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -49,3 +50,4 @@ data "aws_iam_policy_document" "pipeguard_basrashop_deploy" {
       values   = ["repo:CYH9999/*"]
     }
   }
+}
