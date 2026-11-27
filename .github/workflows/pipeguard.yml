@@ -1,0 +1,41 @@
+# PipeGuard gate for the demo repository PipeGuard-demo (DECISIONS D12).
+# It installs PipeGuard from tools/pipeguard/ (a copy made by scripts/build_demo.py in the
+# PipeGuard repository) and fails the check when the gate finds a CRITICAL or HIGH finding,
+# or cannot verify a role (exit 2). GitHub blocks the merge only when a ruleset or branch
+# protection rule requires this check (docs/explain/demo_manual_ar.md).
+# No secrets, no id-token, read-only token; actions pinned to full commit SHAs.
+name: PipeGuard
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read # checkout needs to read the repository; nothing else is granted
+
+concurrency:
+  group: pipeguard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: PipeGuard gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the code to scan
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install PipeGuard from tools/pipeguard
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/python" -m pip install --disable-pip-version-check -r tools/pipeguard/requirements.txt
+
+      - name: Run the PipeGuard gate
+        env:
+          REPO: ${{ github.repository }}
+          PYTHONPATH: tools/pipeguard
+        run: |
+          "$RUNNER_TEMP/venv/bin/python" -m pipeguard gate . --repo "$REPO" --format github

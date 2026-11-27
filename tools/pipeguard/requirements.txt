@@ -1,0 +1,6 @@
+# Runtime dependencies (DECISIONS D3, D7). Versions are the ones installed and tested
+# (2026-11-24; python-hcl2 2026-11-26, it pulls lark and regex).
+requests==2.34.2
+ruamel.yaml==0.19.1
+python-dotenv==1.2.4
+python-hcl2==8.2.0

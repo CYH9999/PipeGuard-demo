@@ -1,0 +1,32 @@
+# PipeGuard demo repo (copied from fixtures/repos/basrashop_critical by scripts/build_demo.py) (.github/workflows/deploy.yml)
+# Weakness: none on the workflow side (push to main, OIDC, SHA pins, job-scoped permissions);
+#           the weakness is the trust policy in infra/main.tf.
+name: Deploy BasraShop site
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  deploy:
+    # Demo only: this job never runs, so the demo repository never sends a token to AWS
+    # (DECISIONS D2, D12). PipeGuard does not evaluate if: (D12): same findings.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::111122223333:role/basrashop-deploy
+          aws-region: eu-central-1
+      - name: Upload
+        run: aws s3 sync site/ s3://basrashop-site --delete
