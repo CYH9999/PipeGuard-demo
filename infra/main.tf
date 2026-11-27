@@ -33,4 +33,19 @@ data "aws_iam_policy_document" "pipeguard_basrashop_deploy" {
       values   = ["repo:CYH9999/PipeGuard-demo:ref:refs/heads/main"]
     }
   }
-}
+}  statement {
+    sid     = "AllMyRepositories"
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = ["arn:aws:iam::111122223333:oidc-provider/token.actions.githubusercontent.com"]
+    }
+
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:CYH9999/*"]
+    }
+  }
